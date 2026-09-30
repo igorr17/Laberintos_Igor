@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visualizador de búsqueda de rutas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="topbar" aria-label="Menú superior">
+    <button id="exploreBtn" class="tb-btn" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Mostrar exploración</span></button>
+    <button id="compareBtn" class="tb-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>Comparar todo</span></button>
+    <button id="pauseBtn" class="tb-btn" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path class="p-pause" d="M8 5v14M16 5v14"/><path class="p-play" d="M7 4l13 8-13 8z"/></svg><span>Pausar</span></button>
+    <button id="shuffleBtn" class="tb-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg><span>Mezclar</span></button>
+  </nav>
+
+  <main class="app">
+    <section class="panel" aria-label="Controles">
+      <h1>Visualizador de rutas</h1>
+
+      <fieldset>
+        <legend>Escenario</legend>
+        <label class="row" for="scenario">Cargar tablero
+          <select id="scenario">
+            <option value="custom">Personalizado (dibuja el tuyo)</option>
+            <optgroup label="Menos pasos">
+              <option value="steps">Ruta más corta por una abertura</option>
+              <option value="dfs">Cualquier ruta vs. la más corta</option>
+            </optgroup>
+            <optgroup label="Pesos y costo">
+              <option value="weights">Desvío alrededor de terreno costoso</option>
+              <option value="cost">Recorrido más barato de tres objetivos</option>
+            </optgroup>
+            <optgroup label="Sin solución">
+              <option value="nosol">Objetivo encerrado</option>
+              <option value="split">Un muro divide la cuadrícula</option>
+              <option value="partial">Uno de dos objetivos inalcanzable</option>
+            </optgroup>
+          </select>
+        </label>
+        <p class="hint" id="scenarioInfo">Elige un escenario para cargar su tablero y un algoritmo adecuado.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dibujar</legend>
+        <div class="tools">
+          <label><input type="radio" name="tool" value="start"><span><i class="ico i-start">S</i><b>Inicio</b></span></label>
+          <label><input type="radio" name="tool" value="target"><span><i class="ico i-target">T</i><b>Objetivo</b></span></label>
+          <label><input type="radio" name="tool" value="wall" checked><span><i class="ico i-wall"></i><b>Muro</b></span></label>
+          <label><input type="radio" name="tool" value="weight"><span><i class="ico i-weight">5</i><b>Peso</b></span></label>
+          <label><input type="radio" name="tool" value="erase"><span><i class="ico i-erase">✕</i><b>Borrar</b></span></label>
+        </div>
+        <label class="row" for="weightValue">Valor del peso
+          <input id="weightValue" type="number" min="2" max="99" value="5">
+        </label>
+        <p class="hint">Haz clic o arrastra sobre la cuadrícula. Arrastra la S o una T para moverla, sea cual sea la herramienta. Borrar elimina un objetivo; la herramienta Objetivo añade más, y la búsqueda visita cada uno, del más cercano al más lejano.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Búsqueda</legend>
+        <label class="row" for="algo">Algoritmo
+          <select id="algo">
+            <option value="bfs">Búsqueda en anchura (BFS)</option>
+            <option value="dfs">Búsqueda en profundidad (DFS)</option>
+            <option value="ucs">Búsqueda de costo uniforme (UCS)</option>
+            <option value="astar">A*</option>
+          </select>
+        </label>
+        <div class="def" id="algoDef" aria-live="polite"></div>
+        <label class="row" for="speed">Velocidad
+          <input id="speed" type="range" min="1" max="100" value="70">
+        </label>
+        <div class="buttons">
+          <button id="run" class="primary">Ejecutar</button>
+          <button id="clearPath">Limpiar ruta</button>
+          <button id="reset">Reiniciar tablero</button>
+        </div>
+      </fieldset>
+
+      <div id="message" role="status" aria-live="polite"></div>
+
+      <ul class="legend" aria-label="Leyenda">
+        <li><i class="sw start"></i>Inicio</li>
+        <li><i class="sw target"></i>Objetivo</li>
+        <li><i class="sw wall"></i>Muro</li>
+        <li><i class="sw weight"></i>Con peso</li>
+        <li><i class="sw visited"></i>Explorado</li>
+        <li><i class="sw path"></i>Ruta</li>
+      </ul>
+    </section>
+
+    <div id="grid" aria-label="Cuadrícula de 20 por 20"></div>
+
+    <aside class="panel metrics-panel" aria-label="Métricas">
+      <h2>Métricas</h2>
+      <dl class="metrics">
+        <div class="metric wide"><dt>Algoritmo</dt><dd data-m="algo">–</dd></div>
+        <div class="metric wide"><dt>Estado</dt><dd data-m="status">Listo</dd></div>
+        <div class="metric"><dt>Objetivos alcanzados</dt><dd data-m="reached">–</dd></div>
+        <div class="metric"><dt>Celdas exploradas</dt><dd data-m="explored">–</dd></div>
+        <div class="metric"><dt>Pasos de la ruta</dt><dd data-m="steps">–</dd></div>
+        <div class="metric"><dt>Costo de la ruta</dt><dd data-m="cost">–</dd></div>
+        <div class="metric"><dt>Tiempo de búsqueda</dt><dd data-m="compute">–</dd></div>
+        <div class="metric"><dt>Tiempo de animación</dt><dd data-m="anim">–</dd></div>
+        <p class="metrics-sep">Tablero</p>
+        <div class="metric"><dt>Muros</dt><dd data-m="walls">0</dd></div>
+        <div class="metric"><dt>Celdas con peso</dt><dd data-m="weighted">0</dd></div>
+        <div class="metric"><dt>Objetivos colocados</dt><dd data-m="targets">0</dd></div>
+        <div class="metric"><dt>Tamaño de cuadrícula</dt><dd>20 × 20</dd></div>
+      </dl>
+    </aside>
+  </main>
+  <dialog id="compareDlg" aria-labelledby="cmpTitle">
+    <h2 id="cmpTitle">Comparación de algoritmos</h2>
+    <p class="hint" id="cmpNote"></p>
+    <div class="cmp-wrap"><table id="cmpTable"></table></div>
+    <form method="dialog"><button class="primary">Cerrar</button></form>
+  </dialog>
+  <script src="script.js"></script>
+</body>
+</html>
