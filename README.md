@@ -92,6 +92,6 @@ propio diseño la hace imposible.
 
 ## Uso de asistentes de IA
 
-Ver la sección 8 del informe técnico para el registro completo: herramienta usada,
+Ver la sección 7 del informe técnico para el registro completo: herramienta usada,
 consultas representativas, qué se aceptó tal cual y qué se modificó, y cómo se verificó
 cada resultado.
