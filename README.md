@@ -87,7 +87,7 @@ propio diseño la hace imposible.
 
 ## Enlaces
 
-- Repositorio: [añadir aquí la URL de GitHub]
+- Repositorio: https://github.com/igorr17/Laberintos_Igor
 - Demo en Netlify: [añadir aquí la URL de Netlify]
 - Informe técnico: `informe_tecnico_visualizador_rutas.pdf`
 
