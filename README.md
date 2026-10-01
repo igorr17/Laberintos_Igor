@@ -41,9 +41,6 @@ por qué llegan a rutas distintas cuando hay pesos de por medio.
 - **A\*** — igual que UCS pero usando la distancia Manhattan como estimación hacia el
   objetivo más cercano; llega al mismo coste óptimo explorando muchas menos celdas.
 
-Ver las secciones 3 y 4 del informe técnico para el detalle de estructura de datos, criterio
-de selección, tratamiento de visitados, reconstrucción de la ruta y la heurística de A*.
-
 ## Los cuatro escenarios de desafío
 
 | # | Escenario | Qué pone a prueba | Algoritmo recomendado |
